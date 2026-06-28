@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  website-scraper-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: website-scraper-mcp
+    # SSE transport exposes an HTTP endpoint
+    command: ["--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      - AZURE_SEARCH_ENDPOINT=${AZURE_SEARCH_ENDPOINT}
+      - AZURE_SEARCH_KEY=${AZURE_SEARCH_KEY}
+      - AZURE_SEARCH_INDEX_NAME=${AZURE_SEARCH_INDEX_NAME:-website-content}
+      - PLAYWRIGHT_TIMEOUT_MS=${PLAYWRIGHT_TIMEOUT_MS:-30000}
+      - MAX_CRAWL_DEPTH=${MAX_CRAWL_DEPTH:-2}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/sse"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
