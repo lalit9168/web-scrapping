@@ -159,6 +159,8 @@ async def run_sse(host: str = "0.0.0.0", port: int = 8000) -> None:
 
     starlette_app = Starlette(
         routes=[
+            # Root health check (needed for Render.com deployment)
+            Route("/",                       endpoint=api_health,           methods=["GET"]),
             # MCP SSE transport
             Route("/sse", endpoint=handle_sse),
             Mount("/messages/", app=sse.handle_post_message),
